@@ -62,11 +62,7 @@ func (s *Server) watchStop() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 	<-stop
-	s.stop()
-}
-
-func (s *Server) stop() {
-	ctx, cancel := gocontext.WithTimeout(gocontext.Background(), time.Second)
+	ctx, cancel := gocontext.WithTimeout(gocontext.Background(), 5*time.Second)
 	defer cancel()
 
 	s.logger.Info("Server is stopping...")
@@ -91,7 +87,6 @@ func (s *Server) initHttp() {
 
 		responseErr := &domain.Error{
 			Type:   "Path not found",
-			Title:  "General Error Handler",
 			Status: c.Response().Status,
 			Detail: err.Error(),
 		}

@@ -9,8 +9,6 @@ const (
 )
 
 type HTTP struct {
-	TrackID  string    `json:"track_id"`
-	Module   string    `json:"module"`
 	Latency  float64   `json:"latency"`
 	Error    string    `json:"error"`
 	Request  *Request  `json:"request"`

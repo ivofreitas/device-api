@@ -19,10 +19,6 @@ var (
 	once sync.Once
 )
 
-const (
-	serviceName string = "device-api"
-)
-
 func Init() {
 	once.Do(func() {
 		logConfig := config.GetEnv().Log
