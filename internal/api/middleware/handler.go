@@ -61,7 +61,7 @@ func (ctrl *Handler) Handle(c echo.Context) error {
 		}
 
 		httpLog.Error = err.Error()
-		return c.JSON(responseErr.Status, err)
+		return c.JSON(http.StatusInternalServerError, err)
 	}
 
 	if result != nil {
@@ -74,8 +74,8 @@ func (ctrl *Handler) Handle(c echo.Context) error {
 
 func (ctrl *Handler) bind(c echo.Context) error {
 	if err := ctrl.Bind(ctrl.param, c); err != nil {
-		return domain.Error{
-			Type:   "Bind error",
+		return &domain.Error{
+			Type:   "bind_error",
 			Status: http.StatusBadRequest,
 			Detail: err.Error(),
 		}
@@ -85,8 +85,8 @@ func (ctrl *Handler) bind(c echo.Context) error {
 
 func (ctrl *Handler) validate() error {
 	if err := ctrl.Struct(ctrl.param); err != nil {
-		return domain.Error{
-			Type:   "Validate error",
+		return &domain.Error{
+			Type:   "validate_error",
 			Status: http.StatusBadRequest,
 			Detail: err.Error(),
 		}

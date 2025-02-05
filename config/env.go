@@ -55,7 +55,7 @@ func GetEnv() *Env {
 	once.Do(func() {
 
 		viper.AutomaticEnv()
-		godotenv.Load("./internal/config/.env")
+		godotenv.Load("./config/.env")
 
 		env = new(Env)
 		env.Server.Port = viper.GetString("PORT")
