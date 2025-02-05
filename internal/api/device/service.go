@@ -44,6 +44,39 @@ func (s *Service) Update(ctx context.Context, param interface{}) (interface{}, e
 	return nil, nil
 }
 
+func (s *Service) Patch(ctx context.Context, param interface{}) (interface{}, error) {
+	patch := param.(domain.Patch)
+	existingDevice, err := s.repository.GetById(ctx, patch.Id)
+	if err != nil || existingDevice == nil {
+		return nil, domain.Error{Type: "not_found", Status: http.StatusNotFound, Detail: "device not found"}
+	}
+
+	if existingDevice.State == domain.InUseState &&
+		(patch.Name != "" && patch.Name != existingDevice.Name ||
+			patch.Brand != "" && patch.Brand != existingDevice.Brand) {
+		return nil, domain.Error{
+			Type:   "update_error",
+			Status: http.StatusForbidden,
+			Detail: "cannot update name or brand of a device in use"}
+	}
+
+	updatedDevice := *existingDevice
+	if patch.Name != "" {
+		updatedDevice.Name = patch.Name
+	}
+	if patch.Brand != "" {
+		updatedDevice.Brand = patch.Brand
+	}
+	if patch.State != 0 {
+		updatedDevice.State = patch.State
+	}
+
+	if err := s.repository.Update(ctx, updatedDevice); err != nil {
+		return nil, domain.Error{Type: "update_error", Status: http.StatusInternalServerError, Detail: err.Error()}
+	}
+	return nil, nil
+}
+
 func (s *Service) GetAll(ctx context.Context, param interface{}) (interface{}, error) {
 	devices, err := s.repository.GetAll(ctx)
 	if err != nil {

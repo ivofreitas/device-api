@@ -17,7 +17,7 @@ func deviceGroup(echo *echo.Echo) {
 	deviceServ := device.NewService(device.NewRepository(db.NewPostgresConnection()))
 	createHdl := middleware.NewHandler(deviceServ.Create, http.StatusCreated, domain.Device{})
 	updateHdl := middleware.NewHandler(deviceServ.Update, http.StatusOK, domain.Update{})
-	patchHdl := middleware.NewHandler(deviceServ.Update, http.StatusOK, domain.Patch{})
+	patchHdl := middleware.NewHandler(deviceServ.Patch, http.StatusOK, domain.Patch{})
 	getAllHdl := middleware.NewHandler(deviceServ.GetAll, http.StatusOK, nil)
 	getByIdHdl := middleware.NewHandler(deviceServ.GetById, http.StatusOK, domain.GetById{})
 	getByBrandHdl := middleware.NewHandler(deviceServ.GetByBrand, http.StatusOK, domain.GetByBrand{})
