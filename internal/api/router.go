@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/ivofreitas/device-api/config/db"
 	"github.com/ivofreitas/device-api/internal/api/device"
 	"github.com/ivofreitas/device-api/internal/api/middleware"
 	"github.com/ivofreitas/device-api/internal/domain"
@@ -13,7 +14,7 @@ func register(echo *echo.Echo) {
 }
 
 func deviceGroup(echo *echo.Echo) {
-	deviceServ := device.NewService(device.NewRepository())
+	deviceServ := device.NewService(device.NewRepository(db.NewPostgresConnection()))
 	createHdl := middleware.NewHandler(deviceServ.Create, http.StatusCreated, domain.Device{})
 	updateHdl := middleware.NewHandler(deviceServ.Update, http.StatusOK, domain.Update{})
 	patchHdl := middleware.NewHandler(deviceServ.Update, http.StatusOK, domain.Patch{})
