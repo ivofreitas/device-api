@@ -1,16 +1,21 @@
 package api
 
 import (
-	"log"
+	"github.com/ivofreitas/device-api/internal/api/device"
+	"github.com/ivofreitas/device-api/internal/api/middleware"
+	"github.com/ivofreitas/device-api/internal/domain"
+	"github.com/labstack/echo/v4"
 	"net/http"
-	"os"
 )
 
-func NewServer() *http.Server {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-		log.Printf("defaulting to port %s", port)
-	}
-	return &http.Server{Addr: "localhost:" + port}
+func register(echo *echo.Echo) {
+	deviceGroup(echo)
+}
+
+func deviceGroup(echo *echo.Echo) {
+	deviceServ := device.NewService(device.NewRepository())
+	createDevice := middleware.NewHandler(deviceServ.Create, http.StatusCreated, domain.CreateDTO{})
+
+	group := echo.Group("/device")
+	group.POST("/", createDevice.Handle)
 }
