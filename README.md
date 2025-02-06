@@ -1,6 +1,6 @@
 # Device API
 
-[![Go Version](https://img.shields.io/badge/Go-1.17-blue.svg)](https://golang.org/)
+[![Go Version](https://img.shields.io/badge/Go-1.23.5-blue.svg)](https://golang.org/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/ivofreitas/device-api/actions)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
 
@@ -79,4 +79,3 @@ http://localhost:8080/swagger/index.html
 
 ## License
 This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
-
