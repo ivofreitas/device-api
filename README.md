@@ -7,14 +7,6 @@
 ## Overview
 Device API is a RESTful microservice designed to manage devices, including CRUD operations, state management, and retrieval by various attributes.
 
-## Features
-- Create, update, delete devices.
-- Retrieve devices by ID, brand, or state.
-- Prevent modification of certain attributes when a device is in use.
-- Fully tested with mocked repositories.
-- OpenAPI (Swagger) documentation support.
-- Docker Compose support for multi-container setup with PostgreSQL.
-
 ## Table of Contents
 - [Makefile Commands](#makefile-commands)
 - [Environment Variables](#environment-variables)
