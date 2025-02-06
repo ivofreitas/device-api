@@ -12,6 +12,19 @@ definitions:
       state:
         $ref: '#/definitions/domain.State'
     type: object
+  domain.Patch:
+    properties:
+      brand:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      state:
+        $ref: '#/definitions/domain.State'
+    required:
+    - id
+    type: object
   domain.State:
     enum:
     - 0
@@ -151,11 +164,67 @@ paths:
       summary: Get a device by ID
       tags:
       - Device
+    patch:
+      consumes:
+      - application/json
+      description: Allows partial updates to a device. Only provided fields are modified.
+      parameters:
+      - description: Device ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Partial device update details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Patch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated device
+          schema:
+            $ref: '#/definitions/domain.Device'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden update
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Device not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Partially update an existing device
+      tags:
+      - Device
     put:
       consumes:
       - application/json
-      description: Updates device details if allowed
+      description: Updates device details if allowed. `PUT` requires a full update,
+        while `PATCH` allows partial updates.
       parameters:
+      - description: Device ID
+        in: path
+        name: id
+        required: true
+        type: integer
       - description: Device update details
         in: body
         name: request
@@ -169,6 +238,12 @@ paths:
           description: Updated device
           schema:
             $ref: '#/definitions/domain.Device'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "403":
           description: Forbidden update
           schema:

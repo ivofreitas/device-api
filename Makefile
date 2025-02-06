@@ -26,6 +26,9 @@ docker-up: ## Run in a container using docker
 docker-down: ## Stop the running container
 	docker-compose down -v --remove-orphans
 
+swag: ## Generate swagger doc
+	swag init -g cmd/server/main.go
+
 tools/golangci-lint/golangci-lint:
 	mkdir -p tools/
 	curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh| sh -s -- -b tools/golangci-lint latest

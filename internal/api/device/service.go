@@ -38,16 +38,19 @@ func (s *Service) Create(ctx context.Context, param interface{}) (interface{}, e
 
 // Update
 // @Summary Update an existing device
-// @Description Updates device details if allowed
+// @Description Updates device details if allowed. `PUT` requires a full update, while `PATCH` allows partial updates.
 // @Tags Device
 // @Accept  json
 // @Produce  json
+// @Param id path int true "Device ID"
 // @Param request body domain.Update true "Device update details"
 // @Success 200 {object} domain.Device "Updated device"
+// @Failure 400 {object} map[string]string "Invalid request body"
 // @Failure 403 {object} map[string]string "Forbidden update"
 // @Failure 404 {object} map[string]string "Device not found"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Router /v1/devices/{id} [put]
+// @Router /v1/devices/{id} [patch]
 func (s *Service) Update(ctx context.Context, param interface{}) (interface{}, error) {
 	update := param.(*domain.Update)
 	existingDevice, err := s.repository.GetById(ctx, update.Id)
@@ -72,6 +75,58 @@ func (s *Service) Update(ctx context.Context, param interface{}) (interface{}, e
 	update.Device.Id = existingDevice.Id
 
 	return update.Device, nil
+}
+
+// Patch (PATCH)
+// @Summary Partially update an existing device
+// @Description Allows partial updates to a device. Only provided fields are modified.
+// @Tags Device
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Device ID"
+// @Param request body domain.Patch true "Partial device update details"
+// @Success 200 {object} domain.Device "Updated device"
+// @Failure 400 {object} map[string]string "Invalid request body"
+// @Failure 403 {object} map[string]string "Forbidden update"
+// @Failure 404 {object} map[string]string "Device not found"
+// @Failure 500 {object} map[string]string "Internal server error"
+// @Router /v1/devices/{id} [patch]
+func (s *Service) Patch(ctx context.Context, param interface{}) (interface{}, error) {
+	patch := param.(*domain.Patch)
+
+	existingDevice, err := s.repository.GetById(ctx, patch.Id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, &domain.Error{Type: "not_found", Status: http.StatusNotFound, Detail: "device not found"}
+		}
+		return nil, &domain.Error{Type: "patch_error", Status: http.StatusInternalServerError, Detail: err.Error()}
+	}
+
+	if existingDevice.State == domain.InUseState &&
+		((patch.Name != nil && *patch.Name != existingDevice.Name) ||
+			(patch.Brand != nil && *patch.Brand != existingDevice.Brand)) {
+		return nil, &domain.Error{
+			Type:   "patch_error",
+			Status: http.StatusForbidden,
+			Detail: "cannot update name or brand of a device in use"}
+
+	}
+
+	if patch.Name != nil {
+		existingDevice.Name = *patch.Name
+	}
+	if patch.Brand != nil {
+		existingDevice.Brand = *patch.Brand
+	}
+	if patch.State != nil {
+		existingDevice.State = *patch.State
+	}
+
+	if err = s.repository.Update(ctx, existingDevice); err != nil {
+		return nil, &domain.Error{Type: "update_error", Status: http.StatusInternalServerError, Detail: err.Error()}
+	}
+
+	return existingDevice, nil
 }
 
 // GetAll

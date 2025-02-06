@@ -25,6 +25,7 @@ Device API is a RESTful microservice designed to manage devices, including CRUD 
 | `make run`         | Build and run the application                       |
 | `make docker-up`   | Start the application with Docker Compose           |
 | `make docker-down` | Stop and remove the Docker Compose containers       |
+| `make swag`        | Generate docs                                       |
 | `make lint`        | Run code linters                                    |
 | `make test`        | Run all unit tests with race detection and coverage |
 | `make mock`        | Generate mocks using Mockery                        |
@@ -32,15 +33,16 @@ Device API is a RESTful microservice designed to manage devices, including CRUD 
 
 ### Endpoints
 
-| Method   | Endpoint                 | Description               |
-|----------|--------------------------|---------------------------|
-| `POST`   | `/devices`               | Create a new device       |
-| `PUT`    | `/devices/{id}`          | Update an existing device |
-| `GET`    | `/devices`               | Get all devices           |
-| `GET`    | `/devices/{id}`          | Get a device by ID        |
-| `GET`    | `/devices/brand/{brand}` | Get devices by brand      |
-| `GET`    | `/devices/state/{state}` | Get devices by state      |
-| `DELETE` | `/devices/{id}`          | Delete a device           |
+| Method   | Endpoint                 | Description                         |
+|----------|--------------------------|-------------------------------------|
+| `POST`   | `/devices`               | Create a new device                 |
+| `PUT`    | `/devices/{id}`          | Update an existing device           |
+| `PATCH`  | `/devices/{id}`          | Partially update an existing device |
+| `GET`    | `/devices`               | Get all devices                     |
+| `GET`    | `/devices/{id}`          | Get a device by ID                  |
+| `GET`    | `/devices/brand/{brand}` | Get devices by brand                |
+| `GET`    | `/devices/state/{state}` | Get devices by state                |
+| `DELETE` | `/devices/{id}`          | Delete a device                     |
 
 ## Environment Variables
 The following environment variables are used in the application:

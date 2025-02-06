@@ -108,6 +108,13 @@ type Update struct {
 	*Device
 }
 
+type Patch struct {
+	Id    int     `param:"id" validate:"required"`
+	Name  *string `json:"name,omitempty"`
+	Brand *string `json:"brand,omitempty"`
+	State *State  `json:"state,omitempty"`
+}
+
 func (u *Update) Validate(fl validator.StructLevel) {
 	if req, ok := fl.Current().Interface().(Update); ok {
 		if req.CreationTime != (time.Time{}) {

@@ -64,6 +64,95 @@ func TestServiceMethods(t *testing.T) {
 			},
 		},
 		{
+			name: "Patch Device - Success",
+			input: &domain.Patch{
+				Id:    1,
+				Name:  ptr("Updated Device"),
+				Brand: ptr("Updated Brand"),
+			},
+			expected: &domain.Device{
+				Id:    1,
+				Name:  "Updated Device",
+				Brand: "Updated Brand",
+				State: domain.AvailableState,
+			},
+			mockSetup: func(m *mocks.Repository, ctx context.Context) {
+				m.On("GetById", ctx, 1).Return(&domain.Device{Id: 1, Name: "Old Name", Brand: "Old Brand", State: domain.AvailableState}, nil)
+				m.On("Update", ctx, mock.Anything).Return(nil)
+			},
+		},
+		{
+			name: "Patch Device - Not Found",
+			input: &domain.Patch{
+				Id: 1,
+			},
+			expectedErr: &domain.Error{Type: "not_found", Status: http.StatusNotFound},
+			mockSetup: func(m *mocks.Repository, ctx context.Context) {
+				m.On("GetById", ctx, 1).Return((*domain.Device)(nil), sql.ErrNoRows)
+			},
+		},
+		{
+			name: "Patch Device - Forbidden Name Change When In Use",
+			input: &domain.Patch{
+				Id:   1,
+				Name: ptr("Updated Name"),
+			},
+			expectedErr: &domain.Error{Type: "patch_error", Status: http.StatusForbidden},
+			mockSetup: func(m *mocks.Repository, ctx context.Context) {
+				m.On("GetById", ctx, 1).Return(&domain.Device{Id: 1, Name: "Old Name", Brand: "Old Brand", State: domain.InUseState}, nil)
+			},
+		},
+		{
+			name: "Patch Device - Forbidden Brand Change When In Use",
+			input: &domain.Patch{
+				Id:    1,
+				Brand: ptr("New Brand"),
+			},
+			expectedErr: &domain.Error{Type: "patch_error", Status: http.StatusForbidden},
+			mockSetup: func(m *mocks.Repository, ctx context.Context) {
+				m.On("GetById", ctx, 1).Return(&domain.Device{Id: 1, Name: "Old Name", Brand: "Old Brand", State: domain.InUseState}, nil)
+			},
+		},
+		{
+			name: "Patch Device - Allowed State Change When In Use",
+			input: &domain.Patch{
+				Id:    1,
+				State: ptr(domain.InactiveState),
+			},
+			expected: &domain.Device{
+				Id:    1,
+				Name:  "Old Name",
+				Brand: "Old Brand",
+				State: domain.InactiveState,
+			},
+			mockSetup: func(m *mocks.Repository, ctx context.Context) {
+				m.On("GetById", ctx, 1).Return(&domain.Device{Id: 1, Name: "Old Name", Brand: "Old Brand", State: domain.InUseState}, nil)
+				m.On("Update", ctx, mock.Anything).Return(nil)
+			},
+		},
+		{
+			name: "Patch Device - Repository Failure on GetById",
+			input: &domain.Patch{
+				Id: 1,
+			},
+			expectedErr: &domain.Error{Type: "patch_error", Status: http.StatusInternalServerError},
+			mockSetup: func(m *mocks.Repository, ctx context.Context) {
+				m.On("GetById", ctx, 1).Return((*domain.Device)(nil), errors.New("database error"))
+			},
+		},
+		{
+			name: "Patch Device - Repository Failure on Update",
+			input: &domain.Patch{
+				Id:    1,
+				State: ptr(domain.InactiveState),
+			},
+			expectedErr: &domain.Error{Type: "update_error", Status: http.StatusInternalServerError},
+			mockSetup: func(m *mocks.Repository, ctx context.Context) {
+				m.On("GetById", ctx, 1).Return(&domain.Device{Id: 1, Name: "Old Name", Brand: "Old Brand", State: domain.AvailableState}, nil)
+				m.On("Update", ctx, mock.Anything).Return(errors.New("update error"))
+			},
+		},
+		{
 			name:  "GetAll - Success",
 			input: nil,
 			expected: []domain.Device{
@@ -202,6 +291,8 @@ func TestServiceMethods(t *testing.T) {
 				result, err = service.Create(ctx, v)
 			case *domain.Update:
 				result, err = service.Update(ctx, v)
+			case *domain.Patch:
+				result, err = service.Patch(ctx, v)
 			case *domain.GetById:
 				result, err = service.GetById(ctx, v)
 			case *domain.GetByState:
@@ -225,4 +316,8 @@ func TestServiceMethods(t *testing.T) {
 			mockRepo.AssertExpectations(t)
 		})
 	}
+}
+
+func ptr[T any](v T) *T {
+	return &v
 }

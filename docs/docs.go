@@ -211,7 +211,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Updates device details if allowed",
+                "description": "Updates device details if allowed. ` + "`" + `PUT` + "`" + ` requires a full update, while ` + "`" + `PATCH` + "`" + ` allows partial updates.",
                 "consumes": [
                     "application/json"
                 ],
@@ -223,6 +223,13 @@ const docTemplate = `{
                 ],
                 "summary": "Update an existing device",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Device ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Device update details",
                         "name": "request",
@@ -238,6 +245,15 @@ const docTemplate = `{
                         "description": "Updated device",
                         "schema": {
                             "$ref": "#/definitions/domain.Device"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "403": {
@@ -316,6 +332,81 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "Allows partial updates to a device. Only provided fields are modified.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Device"
+                ],
+                "summary": "Partially update an existing device",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Device ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Partial device update details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Patch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated device",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Device"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden update",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Device not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             }
         }
     },
@@ -327,6 +418,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "creation_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "state": {
+                    "$ref": "#/definitions/domain.State"
+                }
+            }
+        },
+        "domain.Patch": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "brand": {
                     "type": "string"
                 },
                 "id": {
