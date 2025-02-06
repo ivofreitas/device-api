@@ -11,7 +11,6 @@ Device API is a RESTful microservice designed to manage devices, including CRUD 
 - [Makefile Commands](#makefile-commands)
 - [Environment Variables](#environment-variables)
 - [API Documentation](#api-documentation)
-- [Testing](#testing)
 - [Future improvements](#future-improvements)
 - [License](#license)
 
