@@ -40,7 +40,7 @@ func TestServiceMethods(t *testing.T) {
 		},
 		{
 			name:     "Update Device - Success",
-			input:    &domain.Update{Id: 1, Device: &domain.Device{Name: "Updated Name", Brand: "Same Brand"}},
+			input:    &domain.Update{Id: 1, Name: ptr("Updated Name"), Brand: ptr("Same Brand"), State: ptr(domain.AvailableState)},
 			expected: &domain.Device{Id: 1, Name: "Updated Name", Brand: "Same Brand"},
 			mockSetup: func(m *mocks.Repository, ctx context.Context) {
 				m.On("GetById", ctx, 1).Return(&domain.Device{Id: 1, Name: "Old Name", Brand: "Same Brand"}, nil)
@@ -49,7 +49,7 @@ func TestServiceMethods(t *testing.T) {
 		},
 		{
 			name:        "Update Device - Not Found",
-			input:       &domain.Update{Id: 1, Device: &domain.Device{Name: "Updated Name"}},
+			input:       &domain.Update{Id: 1, Name: ptr("Updated Name"), Brand: ptr("Same Brand"), State: ptr(domain.AvailableState)},
 			expectedErr: &domain.Error{Type: "not_found", Status: http.StatusNotFound},
 			mockSetup: func(m *mocks.Repository, ctx context.Context) {
 				m.On("GetById", ctx, 1).Return((*domain.Device)(nil), sql.ErrNoRows)
@@ -57,7 +57,7 @@ func TestServiceMethods(t *testing.T) {
 		},
 		{
 			name:        "Update Device - In Use State, Forbidden Fields",
-			input:       &domain.Update{Id: 1, Device: &domain.Device{Name: "New Name", Brand: "New Brand"}},
+			input:       &domain.Update{Id: 1, Name: ptr("New Name"), Brand: ptr("New Brand"), State: ptr(domain.AvailableState)},
 			expectedErr: &domain.Error{Type: "update_error", Status: http.StatusForbidden},
 			mockSetup: func(m *mocks.Repository, ctx context.Context) {
 				m.On("GetById", ctx, 1).Return(&domain.Device{Id: 1, State: domain.InUseState, Name: "Old Name", Brand: "Old Brand"}, nil)

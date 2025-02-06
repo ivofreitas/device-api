@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/ivofreitas/device-api/internal/domain"
 	"net/http"
+	"time"
 )
 
 type Service struct {
@@ -53,6 +54,14 @@ func (s *Service) Create(ctx context.Context, param interface{}) (interface{}, e
 // @Router /v1/devices/{id} [patch]
 func (s *Service) Update(ctx context.Context, param interface{}) (interface{}, error) {
 	update := param.(*domain.Update)
+
+	if update.CreationTime != (time.Time{}) {
+		return nil, &domain.Error{
+			Type:   "update_error",
+			Status: http.StatusForbidden,
+			Detail: "cannot update creation time of a device"}
+	}
+
 	existingDevice, err := s.repository.GetById(ctx, update.Id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -62,19 +71,22 @@ func (s *Service) Update(ctx context.Context, param interface{}) (interface{}, e
 	}
 
 	if existingDevice.State == domain.InUseState &&
-		(update.Name != existingDevice.Name || update.Brand != existingDevice.Brand) {
+		(*update.Name != existingDevice.Name || *update.Brand != existingDevice.Brand) {
 		return nil, &domain.Error{
 			Type:   "update_error",
 			Status: http.StatusForbidden,
 			Detail: "cannot update name or brand of a device in use"}
 	}
 
-	if err = s.repository.Update(ctx, update.Device); err != nil {
+	existingDevice.Name = *update.Name
+	existingDevice.Brand = *update.Brand
+	existingDevice.State = *update.State
+
+	if err = s.repository.Update(ctx, existingDevice); err != nil {
 		return nil, &domain.Error{Type: "update_error", Status: http.StatusInternalServerError, Detail: err.Error()}
 	}
-	update.Device.Id = existingDevice.Id
 
-	return update.Device, nil
+	return existingDevice, nil
 }
 
 // Patch (PATCH)
@@ -93,6 +105,13 @@ func (s *Service) Update(ctx context.Context, param interface{}) (interface{}, e
 // @Router /v1/devices/{id} [patch]
 func (s *Service) Patch(ctx context.Context, param interface{}) (interface{}, error) {
 	patch := param.(*domain.Patch)
+
+	if patch.CreationTime != (time.Time{}) {
+		return nil, &domain.Error{
+			Type:   "update_error",
+			Status: http.StatusForbidden,
+			Detail: "cannot update creation time of a device"}
+	}
 
 	existingDevice, err := s.repository.GetById(ctx, patch.Id)
 	if err != nil {

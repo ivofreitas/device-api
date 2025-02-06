@@ -3,7 +3,6 @@ package domain
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"time"
 )
 
@@ -89,43 +88,20 @@ type GetByState struct {
 	State State `param:"state"`
 }
 
-func (g *GetByState) Validate(fl validator.StructLevel) {
-	if req, ok := fl.Current().Interface().(GetByState); ok {
-		if req.State != AvailableState && req.State != InUseState && req.State != InactiveState {
-			fl.ReportError(
-				req.State,
-				"State",
-				"state",
-				"invalid_state",
-				"",
-			)
-		}
-	}
-}
-
 type Update struct {
-	Id int `param:"id" validate:"required"`
-	*Device
+	Id           int       `param:"id" validate:"required"`
+	Name         *string   `json:"name" validate:"required"`
+	Brand        *string   `json:"brand" validate:"required"`
+	State        *State    `json:"state" validate:"required"`
+	CreationTime time.Time `json:"creation_time"`
 }
 
 type Patch struct {
-	Id    int     `param:"id" validate:"required"`
-	Name  *string `json:"name,omitempty"`
-	Brand *string `json:"brand,omitempty"`
-	State *State  `json:"state,omitempty"`
-}
-
-func (u *Update) Validate(fl validator.StructLevel) {
-	if req, ok := fl.Current().Interface().(Update); ok {
-		if req.CreationTime != (time.Time{}) {
-			fl.ReportError(
-				req.CreationTime,
-				"CreationTime",
-				"creation_time",
-				"no_update",
-				"")
-		}
-	}
+	Id           int       `param:"id" validate:"required"`
+	Name         *string   `json:"name,omitempty"`
+	Brand        *string   `json:"brand,omitempty"`
+	State        *State    `json:"state,omitempty"`
+	CreationTime time.Time `json:"creation_time"`
 }
 
 type Delete struct {
