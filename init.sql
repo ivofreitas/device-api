@@ -7,7 +7,7 @@ CREATE TABLE devices_schema.devices (
     name VARCHAR(255) NULL,
     brand VARCHAR(255) NULL,
     state INT NULL,
-    creation_time TIMESTAMP
+    creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes for faster querying

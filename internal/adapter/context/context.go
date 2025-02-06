@@ -12,7 +12,6 @@ func Get(ctx context.Context, key interface{}) (value interface{}) {
 
 	if value == nil {
 		value = reflect.New(reflect.TypeOf(key).Elem()).Interface()
-		ctx = context.WithValue(ctx, key, value)
 	}
 
 	return value

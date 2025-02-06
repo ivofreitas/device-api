@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/labstack/gommon/log"
 	"github.com/spf13/viper"
 	"sync"
 )
@@ -55,7 +56,10 @@ func GetEnv() *Env {
 	once.Do(func() {
 
 		viper.AutomaticEnv()
-		godotenv.Load("./config/.env")
+		err := godotenv.Load("./config/.env")
+		if err != nil {
+			log.Warn(err)
+		}
 
 		env = new(Env)
 		env.Server.Port = viper.GetString("PORT")

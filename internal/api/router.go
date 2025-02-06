@@ -2,15 +2,22 @@ package api
 
 import (
 	"github.com/ivofreitas/device-api/config/db"
+	_ "github.com/ivofreitas/device-api/docs"
 	"github.com/ivofreitas/device-api/internal/api/device"
 	"github.com/ivofreitas/device-api/internal/api/middleware"
 	"github.com/ivofreitas/device-api/internal/domain"
 	"github.com/labstack/echo/v4"
+	"github.com/swaggo/echo-swagger"
 	"net/http"
 )
 
 func register(echo *echo.Echo) {
 	deviceGroup(echo)
+	swaggerGroup(echo)
+}
+
+func swaggerGroup(echo *echo.Echo) {
+	echo.GET("/swagger/*", echoSwagger.WrapHandler)
 }
 
 func deviceGroup(echo *echo.Echo) {

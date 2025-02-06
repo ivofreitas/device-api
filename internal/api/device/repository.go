@@ -7,12 +7,12 @@ import (
 )
 
 type Repository interface {
-	Create(ctx context.Context, device *domain.Device) (int, error)
+	Create(ctx context.Context, device *domain.Device) (*domain.Device, error)
 	Update(ctx context.Context, device *domain.Device) error
 	GetAll(ctx context.Context) ([]domain.Device, error)
 	GetById(ctx context.Context, id int) (*domain.Device, error)
 	GetByBrand(ctx context.Context, brand string) ([]domain.Device, error)
-	GetByState(ctx context.Context, state *domain.State) ([]domain.Device, error)
+	GetByState(ctx context.Context, state domain.State) ([]domain.Device, error)
 	Delete(ctx context.Context, id int) error
 }
 
@@ -24,14 +24,18 @@ func NewRepository(db *sql.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) Create(ctx context.Context, device *domain.Device) (int, error) {
-	query := `INSERT INTO devices_schema.devices (name, brand, state, creation_time) VALUES ($1, $2, $3, $4) RETURNING id`
-	var id int
-	err := r.db.QueryRowContext(ctx, query, device.Name, device.Brand, device.State, device.CreationTime).Scan(&id)
+func (r *repository) Create(ctx context.Context, device *domain.Device) (*domain.Device, error) {
+	query := `
+			INSERT INTO devices_schema.devices (name, brand, state) 
+			VALUES ($1, $2, $3) 
+			RETURNING id, name, brand, state, creation_time`
+	var createdDevice domain.Device
+	err := r.db.QueryRowContext(ctx, query, device.Name, device.Brand, device.State).
+		Scan(&createdDevice.Id, &createdDevice.Name, &createdDevice.Brand, &createdDevice.State, &createdDevice.CreationTime)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return id, nil
+	return &createdDevice, nil
 }
 
 func (r *repository) Update(ctx context.Context, device *domain.Device) error {
@@ -85,7 +89,7 @@ func (r *repository) GetByBrand(ctx context.Context, brand string) ([]domain.Dev
 	return devices, nil
 }
 
-func (r *repository) GetByState(ctx context.Context, state *domain.State) ([]domain.Device, error) {
+func (r *repository) GetByState(ctx context.Context, state domain.State) ([]domain.Device, error) {
 	query := `SELECT id, name, brand, state, creation_time FROM devices_schema.devices WHERE state = $1`
 	rows, err := r.db.QueryContext(ctx, query, state)
 	if err != nil {

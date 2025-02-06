@@ -3,7 +3,6 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15
-    container_name: postgres_device_db
     restart: always
     environment:
       POSTGRES_USER: device_user
@@ -12,8 +11,21 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
-volumes:
-  pgdata:
+  device-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      PORT: 8080
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: device_user
+      DB_PASSWORD: device_pass
+      DB_NAME: device_db
+      DB_SSLMODE: disable
+      LOG_ENABLED: true
+      LOG_LEVEL: debug
+    ports:
+      - "8080:8080"

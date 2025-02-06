@@ -1,0 +1,243 @@
+definitions:
+  domain.Device:
+    properties:
+      brand:
+        type: string
+      creation_time:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      state:
+        $ref: '#/definitions/domain.State'
+    type: object
+  domain.State:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - AvailableState
+    - InUseState
+    - InactiveState
+  domain.Update:
+    properties:
+      brand:
+        type: string
+      creation_time:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      state:
+        $ref: '#/definitions/domain.State'
+    required:
+    - id
+    type: object
+info:
+  contact: {}
+paths:
+  /v1/devices:
+    get:
+      description: Retrieves a list of all devices
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of devices
+          schema:
+            items:
+              $ref: '#/definitions/domain.Device'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get all devices
+      tags:
+      - Device
+    post:
+      consumes:
+      - application/json
+      description: Adds a new device to the inventory
+      parameters:
+      - description: Device details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Device'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created device
+          schema:
+            $ref: '#/definitions/domain.Device'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new device
+      tags:
+      - Device
+  /v1/devices/{id}:
+    delete:
+      description: Removes a device from the inventory
+      parameters:
+      - description: Device ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No content
+        "403":
+          description: Cannot delete device in use
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Device not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a device
+      tags:
+      - Device
+    get:
+      description: Retrieves a single device by its ID
+      parameters:
+      - description: Device ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Device details
+          schema:
+            $ref: '#/definitions/domain.Device'
+        "404":
+          description: Device not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a device by ID
+      tags:
+      - Device
+    put:
+      consumes:
+      - application/json
+      description: Updates device details if allowed
+      parameters:
+      - description: Device update details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Update'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated device
+          schema:
+            $ref: '#/definitions/domain.Device'
+        "403":
+          description: Forbidden update
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Device not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an existing device
+      tags:
+      - Device
+  /v1/devices/brand/{brand}:
+    get:
+      description: Retrieves a single device by its brand
+      parameters:
+      - description: Device Brand
+        in: path
+        name: brand
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Device details
+          schema:
+            $ref: '#/definitions/domain.Device'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a device by brand
+      tags:
+      - Device
+  /v1/devices/state/{state}:
+    get:
+      description: Retrieves a single device by its state
+      parameters:
+      - description: Device State
+        in: path
+        name: brand
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Device details
+          schema:
+            $ref: '#/definitions/domain.Device'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a device by state
+      tags:
+      - Device
+swagger: "2.0"

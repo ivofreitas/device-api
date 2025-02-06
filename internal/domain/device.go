@@ -28,6 +28,15 @@ func ParseState(state string) (State, error) {
 	}
 }
 
+func (s *State) UnmarshalParam(param string) error {
+	parsedState, err := ParseState(param)
+	if err != nil {
+		return err
+	}
+	*s = parsedState
+	return nil
+}
+
 func (s *State) UnmarshalJSON(data []byte) error {
 	var stateStr string
 	if err := json.Unmarshal(data, &stateStr); err != nil {
@@ -77,7 +86,21 @@ type GetByBrand struct {
 }
 
 type GetByState struct {
-	State *State `param:"state" validate:"required"`
+	State State `param:"state"`
+}
+
+func (g *GetByState) Validate(fl validator.StructLevel) {
+	if req, ok := fl.Current().Interface().(GetByState); ok {
+		if req.State != AvailableState && req.State != InUseState && req.State != InactiveState {
+			fl.ReportError(
+				req.State,
+				"State",
+				"state",
+				"invalid_state",
+				"",
+			)
+		}
+	}
 }
 
 type Update struct {

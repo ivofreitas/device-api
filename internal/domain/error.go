@@ -11,5 +11,5 @@ type Error struct {
 }
 
 func (e Error) Error() string {
-	return fmt.Sprintf("%s - %s: %s", e.Type, e.Status, e.Detail)
+	return fmt.Sprintf("%s - %v: %s", e.Type, e.Status, e.Detail)
 }
